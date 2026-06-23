@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script>
-        // Get the tag ID from the URL
-        const params = new URLSearchParams(window.location.search);
-        const tag = params.get('tag');
-        
-        // This is your Google Script URL
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-        
-        // Direct jump - No loading, no fetch errors
-        window.location.href = scriptUrl;
-    </script>
+    <title>Tether Tags</title>
 </head>
 <body>
-    <p>Redirecting to Tether Tag...</p>
+    <p>Authenticating your tag...</p>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const tag = params.get('tag');
+
+        // This calls your Google Script "API" silently
+        // Replace with your actual script URL
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+
+        fetch(scriptUrl)
+            .then(response => response.text())
+            .then(targetUrl => {
+                // If script returns a URL, jump to it
+                // targetUrl will be either register.html, report.html, or renew.html
+                window.location.replace(targetUrl.trim());
+            })
+            .catch(err => {
+                document.body.innerHTML = "Error connecting to server. Please try again.";
+            });
+    </script>
 </body>
 </html>
