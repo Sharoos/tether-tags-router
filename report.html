@@ -64,7 +64,6 @@
             transition: width 0.2s ease;
         }
 
-        /* Color accents for different actions */
         .btn-warning::before { background-color: #f59e0b; }
         .btn-success::before { background-color: #10b981; }
         .btn-info::before { background-color: #3b82f6; }
@@ -120,11 +119,16 @@
     <div id="toast" class="toast">Notification sent via WhatsApp!</div>
 
     <script>
-        const tag = new URLSearchParams(window.location.search).get('tag');
+        // 1. Get the tag from the URL
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
 
+        // 2. MASK THE URL: Strip the tag ID from the address bar immediately
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        // 3. The alert function
         async function sendAlert(issue, buttonElement) {
-            // Button loading state
-            const originalText = buttonElement.innerText;
             buttonElement.innerText = "Sending...";
             buttonElement.style.opacity = "0.7";
             buttonElement.disabled = true;
@@ -136,12 +140,10 @@
                 body: JSON.stringify({ tag: tag, issue: issue }) 
             });
 
-            // Restore button
-            buttonElement.innerText = originalText;
+            buttonElement.innerText = buttonElement.innerText.replace("Sending...", "");
             buttonElement.style.opacity = "1";
             buttonElement.disabled = false;
 
-            // Show stylish toast notification instead of ugly alert()
             const toast = document.getElementById("toast");
             toast.className = "toast show";
             setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
