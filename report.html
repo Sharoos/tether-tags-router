@@ -26,8 +26,7 @@
             border: 3px solid var(--accent); object-fit: cover;
             margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto;
         }
-        .brand h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
-        .brand p { color: var(--text-muted); font-size: 0.9rem; }
+        .brand p { color: var(--text-muted); font-size: 0.9rem; margin-top: 10px; }
 
         .header { text-align: center; margin-bottom: 2rem; }
         .header h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; }
@@ -45,52 +44,41 @@
             width: 100%; background-color: var(--surface); color: var(--text-main);
             border: 1px solid #2d313a; padding: 18px; margin-bottom: 12px;
             border-radius: 12px; font-weight: 500; cursor: pointer; transition: 0.2s;
-            position: relative; overflow: hidden;
+            position: relative; overflow: hidden; text-decoration: none;
         }
         .btn::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
         .btn-warning::before { background-color: #f59e0b; }
         .btn-success::before { background-color: #10b981; }
+        .btn-accent { background: linear-gradient(135deg, var(--accent), #2563eb); border: none; }
         
         .btn:hover { background-color: #242831; transform: scale(1.01); }
         .btn:active { transform: scale(0.98); }
-
-        .toast {
-            visibility: hidden; min-width: 250px; background-color: #10b981;
-            color: white; text-align: center; border-radius: 8px; padding: 16px;
-            position: fixed; z-index: 1; bottom: 30px; left: 50%;
-            transform: translateX(-50%); opacity: 0; transition: 0.3s;
-        }
-        .toast.show { visibility: visible; opacity: 1; bottom: 50px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div class="brand">
             <a href="https://ibb.co/5XnsDTjD"><img src="https://i.ibb.co/5XnsDTjD/TT.png" alt="TT" class="logo-img"></a>
             <p>Smart tags for everything you love. ❤️</p>
         </div>
 
-        <div class="header">
+        <div class="header" id="actionArea">
             <h2>Contact Owner</h2>
             <textarea id="customMsg" rows="3" placeholder="Add a note (Optional, e.g., 'Found near Gate 2')"></textarea>
+            
+            <button class="btn btn-warning" onclick="sendAlert('Blocking Way', this, 'Vehicle is blocking my way')">Vehicle is blocking my way</button>
+            <button class="btn btn-success" onclick="sendAlert('Found Item', this, 'I found your lost item')">I found your lost item</button>
         </div>
-
-        <button class="btn btn-warning" onclick="sendAlert('Blocking Way', this, 'Vehicle is blocking my way')">Vehicle is blocking my way</button>
-        <button class="btn btn-success" onclick="sendAlert('Found Item', this, 'I found your lost item')">I found your lost item</button>
     </div>
 
-    <div id="toast" class="toast">Notification sent!</div>
-
     <script>
-        // 1. Tag handling (Sticky Tag)
+        // 1. Tag handling
         let tag = new URLSearchParams(window.location.search).get('tag');
         if (tag) { localStorage.setItem('currentTag', tag); } else { tag = localStorage.getItem('currentTag'); }
-
-        // 2. MASK THE URL
         window.history.replaceState({}, document.title, window.location.protocol + "//" + window.location.host + window.location.pathname);
 
-        // 3. The alert function with custom message
+        // 2. The alert function
         async function sendAlert(issue, btn, label) {
             const custom = document.getElementById('customMsg').value;
             const finalIssue = custom ? `${issue}: ${custom}` : issue;
@@ -103,10 +91,14 @@
                 body: JSON.stringify({ tag: tag, issue: finalIssue }) 
             });
 
-            btn.innerText = label; btn.disabled = false;
-            const toast = document.getElementById("toast");
-            toast.className = "toast show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+            // Marketing Success State
+            document.getElementById('actionArea').innerHTML = `
+                <div style="text-align: center; padding: 20px 0;">
+                    <h2 style="color: #10b981; margin-bottom: 15px;">Notification Sent!</h2>
+                    <p style="margin-bottom: 25px; color: var(--text-muted);">Thank you for helping reunite this item with its owner.</p>
+                    <a href="https://sharoos.github.io/Tether/" class="btn btn-accent">Get your own Tether Tag</a>
+                </div>
+            `;
         }
     </script>
 </body>
