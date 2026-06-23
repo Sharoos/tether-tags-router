@@ -59,7 +59,7 @@
         .header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
 
         .input-group { margin-bottom: 1.2rem; }
-      
+        
       .logo { width: 150px; height: 150px; border-radius: 24px; margin-bottom: 2rem; border: 1px solid #333; }
         
         input {
@@ -125,8 +125,8 @@
                 <input type="text" name="item" placeholder="Item (e.g., Honda Civic, Backpack)" required>
             </div>
             <div class="input-group">
-                <input type="tel" name="phone" placeholder="WhatsApp Number" required>
-                <span class="helper-text">Must include 91 (e.g., 919876543210)</span>
+                <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" minlength="10" pattern="[0-9]{10}">
+                <span class="helper-text">Enter 10-digit number (no country code)</span>
             </div>
             <button type="submit" id="submitBtn">Complete Setup</button>
         </form>
@@ -136,9 +136,9 @@
         // 1. Get and Sanitize Tag
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
-        if (tag && tag.startsWith("IND-IND-")) { tag = tag.replace("IND-IND-", "IND-"); }
+        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
         
-        // 2. MASK THE URL: Immediately hide the IND- ID
+        // 2. MASK THE URL: Immediately hide the ID
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
@@ -149,15 +149,14 @@
             const btn = document.getElementById('submitBtn');
             const data = Object.fromEntries(new FormData(e.target));
             
-            // Clean phone number
+            // Clean phone number and ensure exactly 10 digits
             let cleanPhone = data.phone.replace(/\D/g, ''); 
-            if (cleanPhone.length === 10 && !cleanPhone.startsWith('91')) {
-                cleanPhone = '91' + cleanPhone;
-            } else if (!cleanPhone.startsWith('91') || cleanPhone.length < 12) {
-                alert("Please enter a valid Indian WhatsApp number starting with 91.");
+            if (cleanPhone.length !== 10) {
+                alert("Please enter exactly 10 digits.");
                 return;
             }
-            data.phone = cleanPhone;
+            // Silently add the country code for WhatsApp API
+            data.phone = '91' + cleanPhone;
             data.tag = tag; // Ensure the sanitized tag is used
 
             btn.innerHTML = "Activating...";
@@ -174,13 +173,13 @@
             const card = document.getElementById('mainCard');
             card.innerHTML = `
                 <div style="text-align: center; padding: 20px 0; animation: fadeIn 0.6s ease;">
-                    <div style="font-size: 3.5rem; margin-bottom: 15px;">✅</div>
-                    <h2 style="color: #10b981; margin-bottom: 10px; font-size: 1.8rem;">Tag Activated!</h2>
+                    <div style="font-size: 3.5rem; margin-bottom: 15px;">✨</div>
+                    <h2 style="color: #10b981; margin-bottom: 10px; font-size: 1.8rem;">Ready for the Real World</h2>
                     <p style="color: var(--text-muted); line-height: 1.6; font-size: 1rem;">
-                        Your tag is successfully linked to your details.
+                        Your tag is successfully linked. Whether it's your car, keys, or pet, you are now protected with privacy-first notifications.
                     </p>
                     <p style="color: var(--text-muted); margin-top: 25px; font-size: 0.9rem; padding: 15px; background: #15171c; border-radius: 8px; border: 1px solid #2d313a;">
-                        You can now close this window and attach the tag to your item.
+                        Attach your Tether Tag to your item. We've got your back from here.
                     </p>
                 </div>
             `;
