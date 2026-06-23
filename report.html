@@ -1,29 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Issue</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; text-align: center; }
-        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #28a745; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
+        :root {
+            --bg-color: #0f1115;
+            --surface: #1c1f26;
+            --text-main: #f8f9fa;
+            --text-muted: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .header { text-align: center; margin-bottom: 2.5rem; }
+        .header h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 5px; }
+        .header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            background-color: var(--surface);
+            color: var(--text-main);
+            border: 1px solid #2d313a;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            transition: width 0.2s ease;
+        }
+
+        /* Color accents for different actions */
+        .btn-warning::before { background-color: #f59e0b; }
+        .btn-success::before { background-color: #10b981; }
+        .btn-info::before { background-color: #3b82f6; }
+
+        .btn:hover {
+            transform: scale(1.02);
+            background-color: #242831;
+            border-color: #404654;
+        }
+
+        .btn:hover::before { width: 8px; }
+        .btn:active { transform: scale(0.98); }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #10b981;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
     </style>
 </head>
 <body>
-    <div style="width:100%; max-width:400px;">
-        <h2>What is the issue?</h2>
-        <button class="btn" onclick="sendAlert('Blocking Way')">Blocking My Way</button>
-        <button class="btn" onclick="sendAlert('Found Item')">I Found Your Item</button>
-        <button class="btn" onclick="sendAlert('Urgent Call')">Please Call Me</button>
+
+    <div class="container">
+        <div class="header">
+            <h2>Contact Owner</h2>
+            <p>Tap a reason below to notify them instantly.</p>
+        </div>
+
+        <button class="btn btn-warning" onclick="sendAlert('Blocking Way', this)">Vehicle is blocking my way</button>
+        <button class="btn btn-success" onclick="sendAlert('Found Item', this)">I found your lost item</button>
+        <button class="btn btn-info" onclick="sendAlert('Urgent Call', this)">Please call me urgently</button>
     </div>
+
+    <div id="toast" class="toast">Notification sent via WhatsApp!</div>
+
     <script>
         const tag = new URLSearchParams(window.location.search).get('tag');
-        async function sendAlert(issue) {
+
+        async function sendAlert(issue, buttonElement) {
+            // Button loading state
+            const originalText = buttonElement.innerText;
+            buttonElement.innerText = "Sending...";
+            buttonElement.style.opacity = "0.7";
+            buttonElement.disabled = true;
+
             await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
                 method: "POST", 
                 mode: "no-cors",
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ tag: tag, issue: issue }) 
             });
-            alert("Sent!");
+
+            // Restore button
+            buttonElement.innerText = originalText;
+            buttonElement.style.opacity = "1";
+            buttonElement.disabled = false;
+
+            // Show stylish toast notification instead of ugly alert()
+            const toast = document.getElementById("toast");
+            toast.className = "toast show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
     </script>
+
 </body>
 </html>
