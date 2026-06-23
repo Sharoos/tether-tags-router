@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>body { display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }</style>
+</head>
 <body>
     <p>Authenticating...</p>
     <script>
         const tag = new URLSearchParams(window.location.search).get('tag');
-        window.location.href = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        fetch(scriptUrl)
+            .then(response => response.text())
+            .then(page => {
+                // The script returns "report.html" or "register.html"
+                window.location.replace(page.trim() + "?tag=" + tag);
+            })
+            .catch(err => {
+                document.body.innerHTML = "<p>Database connection error. Please refresh.</p>";
+            });
     </script>
 </body>
 </html>
