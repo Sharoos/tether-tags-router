@@ -30,6 +30,8 @@
 
         .header { text-align: center; margin-bottom: 2rem; }
         .header h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 10px; }
+      
+        .logo { width: 150px; height: 150px; border-radius: 24px; margin-bottom: 2rem; border: 1px solid #333; }
 
         /* Custom Input */
         textarea {
@@ -58,8 +60,8 @@
 <body>
 
     <div class="container" id="mainContainer">
-        <div class="brand">
-            <a href="https://ibb.co/5XnsDTjD"><img src="https://i.ibb.co/5XnsDTjD/TT.png" alt="TT" class="logo-img"></a>
+        <div class="brand">            
+          <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
             <p>Smart tags for everything you love. ❤️</p>
         </div>
 
@@ -70,15 +72,17 @@
             <button class="btn btn-warning" onclick="sendAlert('Blocking Way', this, 'Vehicle is blocking my way')">Vehicle is blocking my way</button>
             <button class="btn btn-success" onclick="sendAlert('Found Item', this, 'I found your lost item')">I found your lost item</button>
         </div>
-    </div>
+  </div>
 
     <script>
-        // 1. Tag handling
+        // 1. Tag handling (Sticky Tag Logic)
         let tag = new URLSearchParams(window.location.search).get('tag');
         if (tag) { localStorage.setItem('currentTag', tag); } else { tag = localStorage.getItem('currentTag'); }
+        
+        // 2. MASK THE URL
         window.history.replaceState({}, document.title, window.location.protocol + "//" + window.location.host + window.location.pathname);
 
-        // 2. The alert function
+        // 3. The alert function
         async function sendAlert(issue, btn, label) {
             const custom = document.getElementById('customMsg').value;
             const finalIssue = custom ? `${issue}: ${custom}` : issue;
@@ -91,11 +95,11 @@
                 body: JSON.stringify({ tag: tag, issue: finalIssue }) 
             });
 
-            // Marketing Success State
+            // Universal Marketing Success State
             document.getElementById('actionArea').innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
-                    <h2 style="color: #10b981; margin-bottom: 15px;">Notification Sent!</h2>
-                    <p style="margin-bottom: 25px; color: var(--text-muted);">Thank you for helping reunite this item with its owner.</p>
+                    <h2 style="color: #10b981; margin-bottom: 15px;">Owner Notified!</h2>
+                    <p style="margin-bottom: 25px; color: var(--text-muted);">The owner has received your message instantly via WhatsApp. Thank you for reaching out!</p>
                     <a href="https://sharoos.github.io/Tether/home.html" class="btn btn-accent">Get your own Tether Tag</a>
                 </div>
             `;
