@@ -1,42 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register Tether Tag</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f4f4f9; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, button { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; cursor: pointer; }
-    </style>
-</head>
+<html>
 <body>
-    <div class="card">
-        <h2>Register Your Tag</h2>
-        <form id="regForm">
-            <input type="text" id="tagId" name="tag" readonly>
-            <input type="text" name="name" placeholder="Full Name" required>
-            <input type="text" name="item" placeholder="Item Name" required>
-            <input type="tel" name="phone" placeholder="WhatsApp Number (e.g. +1234567890)" required>
-            <button type="submit">Complete Registration</button>
-        </form>
-    </div>
-
+    <form id="regForm">
+        <input type="text" id="tag" name="tag" readonly>
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="item" placeholder="Item" required>
+        <input type="tel" name="phone" placeholder="Phone" required>
+        <button type="submit">Complete Registration</button>
+    </form>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        document.getElementById('tagId').value = params.get('tag');
-
+        document.getElementById('tag').value = new URLSearchParams(window.location.search).get('tag');
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            
-            // Send to your Google Script (must be a NEW deployment that handles POST)
-            await fetch("YOUR_GOOGLE_SCRIPT_URL", {
-                method: "POST",
-                body: JSON.stringify(data)
+            const data = Object.fromEntries(new FormData(e.target));
+            await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify(data) 
             });
-            alert("Registration successful! You are now active.");
+            alert("Registration Success!");
             window.location.href = "report.html?tag=" + data.tag;
         };
     </script>
