@@ -1,28 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Tether Tags</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tether Tags | Authenticating...</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
+    <div class="loader"></div>
     <p>Authenticating your tag...</p>
 
     <script>
+        // Get the Tag ID from the URL
         const params = new URLSearchParams(window.location.search);
         const tag = params.get('tag');
 
-        // This calls your Google Script "API" silently
-        // Replace with your actual script URL
+        // Your silent Google Script API URL
         const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
 
+        // Perform the silent fetch
         fetch(scriptUrl)
             .then(response => response.text())
             .then(targetUrl => {
-                // If script returns a URL, jump to it
-                // targetUrl will be either register.html, report.html, or renew.html
+                // Redirect silently without loading Google's interface
                 window.location.replace(targetUrl.trim());
             })
             .catch(err => {
-                document.body.innerHTML = "Error connecting to server. Please try again.";
+                document.body.innerHTML = "<h3>Connection Error</h3><p>Please check your internet and try scanning again.</p>";
             });
     </script>
 </body>
