@@ -1,24 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Authenticating...</title>
-    <style>body { display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; background: #f8f9fa; }</style>
+    <style>
+        :root { --bg-color: #0f1115; --accent: #3b82f6; }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: #fff; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-    <p>Authenticating Tether Tag...</p>
+
+    <div class="spinner"></div>
+
     <script>
-        const tag = new URLSearchParams(window.location.search).get('tag');
+        // 1. Get the tag from the URL
+        const params = new URLSearchParams(window.location.search);
+        const tag = params.get('tag');
+        
+        // 2. MASK THE URL: Remove the "?tag=IND-..." from the address bar immediately
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        // 3. Perform the silent background fetch
         const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
         
-        // Talk to Google in the background ONLY
         fetch(scriptUrl)
             .then(response => response.text())
             .then(page => {
-                // Instantly redirect to the correct GitHub page
-                window.location.replace(page.trim() + "?tag=" + tag);
-            })
-            .catch(err => {
-                document.body.innerHTML = "<p>Connection error. Please refresh.</p>";
+                const result = page.trim();
+                if (result === "invalid") {
+                    document.body.innerHTML = "<h2>Invalid Tag</h2>";
+                } else {
+                    // Redirect to the final page with the tag hidden from history
+                    window.location.replace(result + "?tag=" + tag);
+                }
             });
     </script>
 </body>
