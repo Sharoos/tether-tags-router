@@ -44,6 +44,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         .header { text-align: center; margin-bottom: 2rem; }
         .header h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; }
         .header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
@@ -71,6 +76,14 @@
         input::placeholder { color: #5a606d; }
         input[readonly] { color: var(--accent); font-weight: 600; cursor: default; background-color: rgba(59, 130, 246, 0.05); }
 
+        .helper-text {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            margin-left: 4px;
+        }
+
         button {
             width: 100%;
             background: linear-gradient(135deg, var(--accent), var(--accent-hover));
@@ -96,7 +109,7 @@
 </head>
 <body>
 
-    <div class="card">
+    <div class="card" id="mainCard">
         <div class="header">
             <h2>Activate Tag</h2>
             <p>Link this tag to your contact details</p>
@@ -112,23 +125,44 @@
                 <input type="text" name="item" placeholder="Item (e.g., Honda Civic, Backpack)" required>
             </div>
             <div class="input-group">
-                <input type="tel" name="phone" placeholder="WhatsApp Number (incl. country code)" required>
+                <input type="tel" id="phoneInput" name="phone" placeholder="WhatsApp Number" required>
+                <span class="helper-text">Must include 91 (e.g., 919876543210)</span>
             </div>
             <button type="submit" id="submitBtn">Complete Setup</button>
         </form>
     </div>
 
     <script>
+        // Extract the tag from the URL and put it in the locked input field
         document.getElementById('tag').value = new URLSearchParams(window.location.search).get('tag');
         
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            btn.innerHTML = "Activating...";
-            btn.style.opacity = "0.7";
-
             const data = Object.fromEntries(new FormData(e.target));
             
+            // SMART PHONE VALIDATION: Clean the phone number of spaces/symbols
+            let cleanPhone = data.phone.replace(/\\D/g, ''); 
+            
+            // Auto-correct: If they only typed 10 digits, add the 91 for them
+            if (cleanPhone.length === 10 && !cleanPhone.startsWith('91')) {
+                cleanPhone = '91' + cleanPhone;
+            } 
+            // Error check: If it doesn't start with 91 after auto-correct, reject it
+            else if (!cleanPhone.startsWith('91') || cleanPhone.length < 12) {
+                alert("Please enter a valid Indian WhatsApp number starting with 91.");
+                return;
+            }
+            
+            // Save the cleaned, perfect number back to the data object
+            data.phone = cleanPhone;
+
+            // UI Loading state
+            btn.innerHTML = "Activating...";
+            btn.style.opacity = "0.7";
+            btn.disabled = true;
+            
+            // Send to Google silently
             await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
                 method: "POST", 
                 mode: "no-cors", 
@@ -136,7 +170,20 @@
                 body: JSON.stringify(data) 
             });
             
-            window.location.href = "report.html?tag=" + data.tag;
+            // UI Success State (Replaces the form, kills the redirect)
+            const card = document.getElementById('mainCard');
+            card.innerHTML = `
+                <div style="text-align: center; padding: 20px 0; animation: fadeIn 0.6s ease;">
+                    <div style="font-size: 3.5rem; margin-bottom: 15px;">✅</div>
+                    <h2 style="color: #10b981; margin-bottom: 10px; font-size: 1.8rem;">Tag Activated!</h2>
+                    <p style="color: var(--text-muted); line-height: 1.6; font-size: 1rem;">
+                        Your tag is successfully linked to your details.
+                    </p>
+                    <p style="color: var(--text-muted); margin-top: 25px; font-size: 0.9rem; padding: 15px; background: #15171c; border-radius: 8px; border: 1px solid #2d313a;">
+                        You can now close this window and attach the tag to your item.
+                    </p>
+                </div>
+            `;
         };
     </script>
 
