@@ -2,28 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authenticating...</title>
     <style>
         :root { --bg-color: #0f1115; --accent: #3b82f6; }
-        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: #fff; }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        body { 
+            background-color: var(--bg-color); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            color: #fff; 
+            margin: 0;
+        }
+        .container { text-align: center; }
+        .spinner { 
+            width: 40px; 
+            height: 40px; 
+            border: 4px solid rgba(59, 130, 246, 0.2); 
+            border-top-color: var(--accent); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto 20px auto;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
+        h2 { font-weight: 500; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <div class="spinner"></div>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Authenticating Tag...</h2>
+    </div>
 
     <script>
         // 1. Get the tag from the URL
         const params = new URLSearchParams(window.location.search);
-        const tag = params.get('tag');
+        let tag = params.get('tag');
         
-        // 2. MASK THE URL: Remove the "?tag=IND-..." from the address bar immediately
+        // 2. SANITIZE: Remove double prefix if it exists (e.g., IND-IND- -> IND-)
+        if (tag && tag.startsWith("IND-IND-")) {
+            tag = tag.replace("IND-IND-", "IND-");
+        }
+        
+        // 3. MASK THE URL: Remove the "?tag=..." from the address bar immediately
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
-        // 3. Perform the silent background fetch
+        // 4. Perform the silent background fetch
         const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
         
         fetch(scriptUrl)
@@ -31,11 +59,14 @@
             .then(page => {
                 const result = page.trim();
                 if (result === "invalid") {
-                    document.body.innerHTML = "<h2>Invalid Tag</h2>";
+                    document.body.innerHTML = "<h2 style='color: #ef4444;'>Invalid or Unregistered Tag</h2>";
                 } else {
-                    // Redirect to the final page with the tag hidden from history
+                    // Redirect to the final page with the tag appended
                     window.location.replace(result + "?tag=" + tag);
                 }
+            })
+            .catch(err => {
+                document.body.innerHTML = "<h2 style='color: #f59e0b;'>Connection Error</h2>";
             });
     </script>
 </body>
