@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head>
+<body>
+    <p>Loading Tether Tag...</p>
     <script>
-        // Get the tag ID from the URL
         const params = new URLSearchParams(window.location.search);
         const tag = params.get('tag');
-        
-        // The script URL
+        // IMPORTANT: In Google Script, change return to JSON so GitHub can read it
         const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-        
-        // FORCE the browser to navigate to the script immediately
-        // This bypasses CORS and the "Loading" hang entirely
-        window.location.href = scriptUrl;
+
+        fetch(scriptUrl)
+            .then(response => response.text())
+            .then(targetUrl => {
+                // The user never sees the script URL. 
+                // They stay on your GitHub page until the final redirect.
+                window.location.replace(targetUrl.trim());
+            });
     </script>
-</head>
-<body>
-    <p>Redirecting to Tether Tag...</p>
 </body>
 </html>
