@@ -2,25 +2,19 @@
 <html>
 <head>
     <script>
+        // Get the tag ID from the URL
         const params = new URLSearchParams(window.location.search);
         const tag = params.get('tag');
         
-        // PASTE YOUR GOOGLE SCRIPT URL HERE
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec";
-
-        if (tag) {
-            fetch(scriptUrl + "?tag=" + tag)
-                .then(response => response.text())
-                .then(url => {
-                    window.location.href = url;
-                });
-        } else {
-            // Fallback if no tag is provided
-            window.location.href = "https://tally.so/r/eqyv7Q";
-        }
+        // The script URL
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        // FORCE the browser to navigate to the script immediately
+        // This bypasses CORS and the "Loading" hang entirely
+        window.location.href = scriptUrl;
     </script>
 </head>
 <body>
-    <p>Loading Tether Tag...</p>
+    <p>Redirecting to Tether Tag...</p>
 </body>
 </html>
