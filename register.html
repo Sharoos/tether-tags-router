@@ -40,14 +40,8 @@
             transform: translateY(20px);
         }
 
-        @keyframes slideUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         .header { text-align: center; margin-bottom: 2rem; }
         .header h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; }
@@ -76,13 +70,7 @@
         input::placeholder { color: #5a606d; }
         input[readonly] { color: var(--accent); font-weight: 600; cursor: default; background-color: rgba(59, 130, 246, 0.05); }
 
-        .helper-text {
-            display: block;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-top: 6px;
-            margin-left: 4px;
-        }
+        .helper-text { display: block; color: var(--text-muted); font-size: 0.8rem; margin-top: 6px; margin-left: 4px; }
 
         button {
             width: 100%;
@@ -99,11 +87,7 @@
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
         button:active { transform: translateY(0); }
     </style>
 </head>
@@ -125,7 +109,7 @@
                 <input type="text" name="item" placeholder="Item (e.g., Honda Civic, Backpack)" required>
             </div>
             <div class="input-group">
-                <input type="tel" id="phoneInput" name="phone" placeholder="WhatsApp Number" required>
+                <input type="tel" name="phone" placeholder="WhatsApp Number" required>
                 <span class="helper-text">Must include 91 (e.g., 919876543210)</span>
             </div>
             <button type="submit" id="submitBtn">Complete Setup</button>
@@ -133,36 +117,37 @@
     </div>
 
     <script>
-        // Extract the tag from the URL and put it in the locked input field
-        document.getElementById('tag').value = new URLSearchParams(window.location.search).get('tag');
+        // 1. Get and Sanitize Tag
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
+        if (tag && tag.startsWith("IND-IND-")) { tag = tag.replace("IND-IND-", "IND-"); }
+        
+        // 2. MASK THE URL: Immediately hide the IND- ID
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        document.getElementById('tag').value = tag;
         
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const data = Object.fromEntries(new FormData(e.target));
             
-            // SMART PHONE VALIDATION: Clean the phone number of spaces/symbols
-            let cleanPhone = data.phone.replace(/\\D/g, ''); 
-            
-            // Auto-correct: If they only typed 10 digits, add the 91 for them
+            // Clean phone number
+            let cleanPhone = data.phone.replace(/\D/g, ''); 
             if (cleanPhone.length === 10 && !cleanPhone.startsWith('91')) {
                 cleanPhone = '91' + cleanPhone;
-            } 
-            // Error check: If it doesn't start with 91 after auto-correct, reject it
-            else if (!cleanPhone.startsWith('91') || cleanPhone.length < 12) {
+            } else if (!cleanPhone.startsWith('91') || cleanPhone.length < 12) {
                 alert("Please enter a valid Indian WhatsApp number starting with 91.");
                 return;
             }
-            
-            // Save the cleaned, perfect number back to the data object
             data.phone = cleanPhone;
+            data.tag = tag; // Ensure the sanitized tag is used
 
-            // UI Loading state
             btn.innerHTML = "Activating...";
             btn.style.opacity = "0.7";
             btn.disabled = true;
             
-            // Send to Google silently
             await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
                 method: "POST", 
                 mode: "no-cors", 
@@ -170,7 +155,6 @@
                 body: JSON.stringify(data) 
             });
             
-            // UI Success State (Replaces the form, kills the redirect)
             const card = document.getElementById('mainCard');
             card.innerHTML = `
                 <div style="text-align: center; padding: 20px 0; animation: fadeIn 0.6s ease;">
@@ -186,6 +170,5 @@
             `;
         };
     </script>
-
 </body>
 </html>
