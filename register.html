@@ -43,9 +43,20 @@
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
+        /* FIXED LAYOUT STYLES */
         .header { text-align: center; margin-bottom: 2rem; }
-        .header h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; }
-        .header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
+        .logo-container { margin-bottom: 1.5rem; }
+        .logo-container img { 
+            width: 90px; 
+            height: 90px; 
+            border-radius: 50%; 
+            border: 3px solid var(--accent); 
+            object-fit: cover; 
+            display: block;
+            margin: 0 auto;
+        }
+        .header h2 { font-size: 1.6rem; font-weight: 600; margin-top: 10px; }
+        .header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
 
         .input-group { margin-bottom: 1.2rem; }
         
@@ -95,9 +106,13 @@
 
     <div class="card" id="mainCard">
         <div class="header">
-            <h2>Activate Tag</h2>
-            <p>Link this tag to your contact details</p>
+            <div class="logo-container">
+                <a href="https://ibb.co/5XnsDTjD"><img src="https://i.ibb.co/5XnsDTjD/TT.png" alt="Tether Tags Logo"></a>
+            </div>
+            <h5>Smart tags for everything you love. ❤️</h5>
+            <p>Activate your smart tag.</p>
         </div>
+        
         <form id="regForm">
             <div class="input-group">
                 <input type="text" id="tag" name="tag" readonly>
