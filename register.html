@@ -126,37 +126,36 @@
     const params = new URLSearchParams(window.location.search);
     let tag = params.get('tag');
 
-    // DEBUGGING: If you see "Tag is null" in your browser console, that is why it redirects
-    console.log("Current Tag:", tag);
-
     if (!tag || tag.trim() === "" || tag === "null") {
-        console.log("Tag is empty, redirecting to home.html");
         window.location.replace('home.html');
     }
 
     if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
     document.getElementById('tag').value = tag;
 
-    // 3. RESTORED VERIFICATION GATE
-    // This fetch ensures the page knows if it should stay open or redirect
+    // 3. SECURITY CHECK WITH DIAGNOSTIC FEEDBACK
     const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
     
     fetch(verifyUrl)
         .then(res => res.text())
         .then(status => {
-            console.log("Server status:", status); // Check console to see what your sheet says
-            if (status.trim() === "register.html") {
-                // Tag is unregistered, allow form to show
-                document.getElementById('formView').style.display = 'block';
+            const response = status.trim();
+            console.log("SERVER RETURNED:", response); 
+            
+            if (response === "register.html") {
                 document.getElementById('loadingView').style.display = 'none';
+                document.getElementById('formView').style.display = 'block';
             } else {
-                // Tag is registered or invalid, go home
-                window.location.replace('home.html');
+                // STOP REDIRECTING! Show the error on screen so we can fix it.
+                document.getElementById('loadingView').innerHTML = `
+                    <h2 style="color:var(--accent)">Verification Error</h2>
+                    <p>The server returned: <strong>${response}</strong></p>
+                    <p>Check your Google Apps Script logic.</p>
+                `;
             }
         })
-        .catch(() => {
-            console.log("Fetch failed, redirecting");
-            window.location.replace('home.html');
+        .catch((err) => {
+            document.getElementById('loadingView').innerHTML = `<h2>Error</h2><p>${err}</p>`;
         });
 
     // 4. FORM SUBMISSION
