@@ -16,11 +16,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
         body { 
+            margin: 0;
             background-color: var(--bg-color); 
             background-image: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 100%);
             color: var(--text-main); 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; padding: 20px;
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; /* Aligns to top */
+            padding-top: 80px;       /* Exact distance from top */
+            min-height: 100vh; 
         }
         
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -59,17 +63,18 @@
     </div>
 
     <script>
-        // Get the payment link from the URL parameters
+        // 1. SECURITY GUARDRAIL: Check for the payment link
         const urlParams = new URLSearchParams(window.location.search);
         const link = urlParams.get('link');
         const btn = document.getElementById('pay-link');
         const err = document.getElementById('error-msg');
 
-        if (link) {
-            btn.href = decodeURIComponent(link);
+        // If no link is provided, kick user to home page immediately
+        if (!link || link.trim() === "" || link === "null") {
+            window.location.replace('home.html');
         } else {
-            btn.style.display = "none";
-            err.style.display = "block";
+            // 2. Decode and set the payment link
+            btn.href = decodeURIComponent(link);
         }
     </script>
 </body>
