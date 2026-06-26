@@ -117,55 +117,68 @@
         </div>
     </div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        let tag = params.get('tag');
+<script>
+    // 1. MASK URL IMMEDIATELY (Before anything else happens)
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
 
-        // Security Guardrail: Redirect if tag is invalid/empty
-        if (!tag || tag.trim() === "" || tag === "null") {
+    // 2. Setup Logic
+    const params = new URLSearchParams(window.location.search);
+    let tag = params.get('tag');
+
+    // Security Guardrail: Redirect if tag is invalid/empty
+    if (!tag || tag.trim() === "" || tag === "null") {
+        window.location.replace('home.html');
+    }
+
+    // Sanitization
+    if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
+    document.getElementById('tag').value = tag;
+
+    // 3. Verification Check
+    const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+    
+    fetch(verifyUrl).then(res => res.text()).then(status => {
+        if (status.trim() === "register.html") {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+        } else {
             window.location.replace('home.html');
         }
+    }).catch(() => window.location.replace('home.html'));
 
-        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-        document.getElementById('tag').value = tag;
-
-        // VERIFICATION STEP
-        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+    // 4. Form Submission
+    document.getElementById('regForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const data = Object.fromEntries(new FormData(e.target));
         
-        fetch(verifyUrl).then(res => res.text()).then(status => {
-            if (status.trim() === "register.html") {
-                document.getElementById('loadingView').style.display = 'none';
-                document.getElementById('formView').style.display = 'block';
-            } else {
-                window.location.replace('home.html');
-            }
-        }).catch(() => window.location.replace('home.html'));
+        let cleanPhone = data.phone.replace(/\D/g, ''); 
+        data.phone = '91' + cleanPhone;
+        data.tag = tag; // Use the sanitized tag
 
-        // FORM SUBMISSION
-        document.getElementById('regForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const data = Object.fromEntries(new FormData(e.target));
-            data.phone = '91' + data.phone.replace(/\D/g, '');
-            data.tag = tag;
-
-            btn.innerHTML = "Activating...";
-            btn.disabled = true;
-            
-            // CORRECTED URL ENDPOINT
-            await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
-                method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
-            });
-            
-            document.getElementById('mainCard').innerHTML = `
-                <div style="text-align: center; padding: 20px 0;">
-                    <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
-                    <h2 style="color: #FF6961; margin-bottom: 10px;">Activation Successful!</h2>
-                    <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
-                </div>
-            `;
-            setTimeout(() => { window.location.replace('home.html'); }, 3000);
-        };
-    </script>
+        btn.innerHTML = "Activating..."; 
+        btn.disabled = true;
+        
+        // This is your data submission endpoint
+        await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
+            method: "POST", 
+            mode: "no-cors", 
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(data) 
+        });
+        
+        // Show Success
+        const mainCard = document.getElementById('mainCard');
+        mainCard.innerHTML = `
+            <div class="box">
+                <h2>Activation Successful!</h2>
+                <p>Your tag is linked. Redirecting...</p>
+            </div>
+        `;
+        
+        setTimeout(() => { window.location.replace('home.html'); }, 3000);
+    };
+</script>
 </body>
 </html>
