@@ -120,33 +120,39 @@
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
 
-        // URL Masking (Keep the URL clean)
+        // URL Masking
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
-        if (tag) {
-            if (tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-            document.getElementById('tag').value = tag;
-            
-            // VERIFICATION (Soft check)
-            const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-            
-            fetch(verifyUrl).then(res => res.text()).then(status => {
+        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
+        document.getElementById('tag').value = tag;
+
+        // VERIFICATION GATE
+        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        fetch(verifyUrl)
+            .then(res => res.text())
+            .then(status => {
                 const response = status.trim();
+                console.log("SERVER SAYS:", response);
+                
                 if (response === "register.html") {
                     document.getElementById('loadingView').style.display = 'none';
                     document.getElementById('formView').style.display = 'block';
                 } else {
-                    document.getElementById('loadingView').innerHTML = `<h2>Invalid Tag</h2><p>Server returned: ${response}</p>`;
+                    // STOP REDIRECTING! Show the error instead
+                    document.getElementById('loadingView').innerHTML = `
+                        <h2 style="color:var(--accent)">Verification Failed</h2>
+                        <p>Server returned: <strong>${response}</strong></p>
+                        <p>If you see this, your Sheet thinks this tag isn't ready for registration.</p>
+                    `;
                 }
-            }).catch(() => {
-                document.getElementById('loadingView').innerHTML = `<h2>Error connecting</h2>`;
+            })
+            .catch((err) => {
+                document.getElementById('loadingView').innerHTML = `<h2>Error</h2><p>${err}</p>`;
             });
-        } else {
-            window.location.replace('home.html');
-        }
 
-        // FORM SUBMISSION (Uses your working logic)
+        // FORM SUBMISSION
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -164,7 +170,8 @@
                 method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
             });
             
-            document.getElementById('mainCard').innerHTML = `
+            const card = document.getElementById('mainCard');
+            card.innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
                     <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #FF6961; margin-bottom: 10px;">Ready for the Real World</h2>
