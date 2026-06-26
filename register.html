@@ -88,7 +88,6 @@
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
             <div class="spinner"></div>
             <h2 style="margin-bottom: 10px;">Authenticating...</h2>
-            <p>Verifying the Tether Tag.</p>
         </div>
 
         <div id="formView" style="display: none;">
@@ -118,43 +117,43 @@
     </div>
 
     <script>
-        // 1. URL MASKING
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
+
+        // URL Masking (Keep the URL clean)
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
-        if (!tag || tag.trim() === "" || tag === "null") {
-            window.location.replace('home.html');
-        }
-
-        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-        document.getElementById('tag').value = tag;
-
-        // 2. SECURITY GATE: Verify with Google Sheet
-        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-        
-        fetch(verifyUrl)
-            .then(res => res.text())
-            .then(status => {
-                // If the Sheet returns 'register.html', we show the form.
-                if (status.trim() === "register.html") {
+        if (tag) {
+            if (tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
+            document.getElementById('tag').value = tag;
+            
+            // VERIFICATION (Soft check)
+            const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+            
+            fetch(verifyUrl).then(res => res.text()).then(status => {
+                const response = status.trim();
+                if (response === "register.html") {
                     document.getElementById('loadingView').style.display = 'none';
                     document.getElementById('formView').style.display = 'block';
                 } else {
-                    // Redirect to home if tag is not valid
-                    window.location.replace('home.html');
+                    document.getElementById('loadingView').innerHTML = `<h2>Invalid Tag</h2><p>Server returned: ${response}</p>`;
                 }
-            })
-            .catch(() => window.location.replace('home.html'));
+            }).catch(() => {
+                document.getElementById('loadingView').innerHTML = `<h2>Error connecting</h2>`;
+            });
+        } else {
+            window.location.replace('home.html');
+        }
 
-        // 3. FORM SUBMISSION
+        // FORM SUBMISSION (Uses your working logic)
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const data = Object.fromEntries(new FormData(e.target));
             
             let cleanPhone = data.phone.replace(/\D/g, ''); 
+            if (cleanPhone.length !== 10) { alert("Please enter exactly 10 digits."); return; }
             data.phone = '91' + cleanPhone;
             data.tag = tag;
 
@@ -169,7 +168,7 @@
                 <div style="text-align: center; padding: 20px 0;">
                     <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #FF6961; margin-bottom: 10px;">Ready for the Real World</h2>
-                    <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
+                    <p style="color: white;">Your tag is successfully linked.</p>
                 </div>
             `;
         };
