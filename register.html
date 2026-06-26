@@ -16,70 +16,74 @@
         
         body { 
             background: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 100%);
-            min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: flex-start; 
-            padding-top: 80px; color: white;
+            min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; 
+            padding: 20px; color: white;
         }
 
-        /* Container matches the index/auth box width and structure */
+        /* Authentication Spinner Style (Matches original index.html) */
         .container { text-align: center; max-width: 350px; width: 100%; }
-        
-        /* Box matches the original registration/auth card style */
-        .box { padding: 40px; background: var(--surface); border-radius: 24px; border: 1px solid #222; width: 100%; }
-        
+        .box { padding: 40px; background: var(--surface); border-radius: 24px; border: 1px solid #222; }
         .logo { width: 100px; height: 100px; border-radius: 20px; margin-bottom: 2rem; border: 1px solid #333; }
-        
-        /* Spinner matches index.html */
         .spinner { 
             width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); 
             border-top-color: var(--accent); border-radius: 50%; 
             animation: spin 0.8s linear infinite; margin: 0 auto 20px auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        h2 { font-size: 1.5rem; margin-bottom: 10px; }
-        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
-        
+
+        /* Registration Card Style (Matches original register.html) */
+        .card {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid #222;
+            width: 100%;
+            max-width: 400px;
+        }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header img { width: 90px; height: 90px; margin-bottom: 1.5rem; }
+
         .input-group { margin-bottom: 1.2rem; text-align: left; }
         input { width: 100%; background: #161616; border: 1px solid #333; color: white; padding: 16px; border-radius: 12px; font-size: 1rem; }
         input:focus { border-color: var(--accent); outline: none; }
-        input[readonly] { color: var(--accent); font-weight: 600; }
+        input[readonly] { color: var(--accent); font-weight: 600; cursor: not-allowed; }
         button { width: 100%; background: white; color: black; border: none; padding: 18px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; }
         .helper-text { display: block; color: var(--text-muted); font-size: 0.75rem; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="mainCard">
-        <div class="box" id="loader">
+    <div class="container" id="loader">
+        <div class="box">
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
             <div class="spinner"></div>
             <h2>Authenticating...</h2>
-            <p>Verifying tag security.</p>
+            <p>Verifying Tether Tag.</p>
         </div>
+    </div>
 
-        <div class="box" id="formContainer" style="display: none;">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether" style="width: 90px; height: 90px; margin-bottom: 1.5rem;">
-                <h2>Activate your Tag</h2>
-            </div>
-            <form id="regForm">
-                <div class="input-group"><input type="text" id="tag" name="tag" readonly></div>
-                <div class="input-group"><input type="text" name="name" placeholder="Full Name" required></div>
-                <div class="input-group"><input type="text" name="item" placeholder="Item (e.g., Honda Civic)" required></div>
-                <div class="input-group">
-                    <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" pattern="[0-9]{10}">
-                    <span class="helper-text">10-digit number only (no country code)</span>
-                </div>
-                <button type="submit" id="submitBtn">Activate Tag</button>
-            </form>
+    <div class="card" id="formContainer" style="display: none;">
+        <div class="header">
+            <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+            <h2>Activate your Tag</h2>
+            <p>Smart tags for everything you <span style="color: #FF6961;">love</span></p>
         </div>
+        <form id="regForm">
+            <div class="input-group"><input type="text" id="tag" name="tag" readonly></div>
+            <div class="input-group"><input type="text" name="name" placeholder="Full Name" required></div>
+            <div class="input-group"><input type="text" name="item" placeholder="Item (e.g., Honda Civic)" required></div>
+            <div class="input-group">
+                <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" pattern="[0-9]{10}">
+                <span class="helper-text">10-digit number only (no country code)</span>
+            </div>
+            <button type="submit" id="submitBtn">Activate Tag</button>
+        </form>
     </div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
 
-        // URL Masking Code
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
@@ -87,7 +91,6 @@
         if (tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
         document.getElementById('tag').value = tag;
 
-        // Security Check
         const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
         
         fetch(verifyUrl).then(res => res.text()).then(status => {
@@ -97,7 +100,6 @@
             } else { window.location.replace('home.html'); }
         }).catch(() => window.location.replace('home.html'));
 
-        // Form Submission
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -108,7 +110,14 @@
             btn.innerHTML = "Activating..."; btn.disabled = true;
             await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhf/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
             
-            document.getElementById('mainCard').innerHTML = `<div class="box"><h2>Success!</h2><p>Your tag is linked. Redirecting...</p></div>`;
+            document.getElementById('formContainer').parentElement.innerHTML = `
+                <div style="text-align: center; padding: 20px 0;">
+                    <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+                    <h2 style="color: #FF6961; margin-bottom: 10px;">Activation Successful!</h2>
+                    <p style="color: white; margin-bottom: 20px;">Your tag is successfully linked. We've got your back from here.</p>
+                    <p style="font-size: 0.85rem; color: #555;">Redirecting automatically...</p>
+                </div>
+            `;
             setTimeout(() => { window.location.replace('home.html'); }, 3000);
         };
     </script>
