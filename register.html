@@ -117,56 +117,48 @@
         </div>
     </div>
 
-<script>
-    // 1. MASK URL IMMEDIATELY (Before anything else happens)
-    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-    window.history.replaceState({}, document.title, cleanUrl);
+    <script>
+        // 1. Consolidated Logic
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
 
-    // 2. Setup Logic
-    const params = new URLSearchParams(window.location.search);
-    let tag = params.get('tag');
-
-    // Security Guardrail: Redirect if tag is invalid/empty
-    if (!tag || tag.trim() === "" || tag === "null") {
-        window.location.replace('home.html');
-    }
-
-    // Sanitization
-    if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-    document.getElementById('tag').value = tag;
-
-    // 3. Verification Check
-    const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-    
-    fetch(verifyUrl).then(res => res.text()).then(status => {
-        if (status.trim() === "register.html") {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('formContainer').style.display = 'block';
-        } else {
+        // Security Guardrail: Redirect if tag is invalid/empty
+        if (!tag || tag.trim() === "" || tag === "null") {
             window.location.replace('home.html');
         }
-    }).catch(() => window.location.replace('home.html'));
 
-    // 4. Form Submission
-    document.getElementById('regForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        const data = Object.fromEntries(new FormData(e.target));
+        // Sanitization
+        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
         
-        let cleanPhone = data.phone.replace(/\D/g, ''); 
-        data.phone = '91' + cleanPhone;
-        data.tag = tag; // Use the sanitized tag
+        // Mask URL
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
 
-        btn.innerHTML = "Activating..."; 
-        btn.disabled = true;
+        document.getElementById('tag').value = tag;
         
-        // This is your data submission endpoint
-        await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
-            method: "POST", 
-            mode: "no-cors", 
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(data) 
-        });
+        // 2. Form Submission
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            let cleanPhone = data.phone.replace(/\D/g, ''); 
+            if (cleanPhone.length !== 10) {
+                alert("Please enter exactly 10 digits.");
+                return;
+            }
+            data.phone = '91' + cleanPhone;
+            data.tag = tag;
+
+            btn.innerHTML = "Activating...";
+            btn.disabled = true;
+            
+            await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
+                method: "POST", 
+                mode: "no-cors", 
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(data) 
+            });
         
         // Show Success
         const mainCard = document.getElementById('mainCard');
