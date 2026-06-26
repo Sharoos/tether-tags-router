@@ -152,9 +152,16 @@
                 <div style="text-align: center; padding: 20px 0;">
                     <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #FF6961; margin-bottom: 10px;">Activation Successful!</h2>
-                    <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
+                    <p style="color: white; margin-bottom: 20px;">Your tag is successfully linked. We've got your back from here.</p>
+                    <p style="font-size: 0.85rem; color: #555;">Redirecting automatically...</p>
                 </div>
             `;
+
+            // 3. AUTOMATIC REDIRECT
+            // Waits 3.5 seconds then bounces the user to the home page
+            setTimeout(() => {
+                window.location.replace('home.html');
+            }, 3500);
         };
     </script>
 </body>
