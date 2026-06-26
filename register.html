@@ -117,71 +117,68 @@
         </div>
     </div>
 
-<script>
-    // 1. MASK URL IMMEDIATELY
-    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-    window.history.replaceState({}, document.title, cleanUrl);
+    <script>
+        // 1. URL MASKING (Happens immediately)
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
 
-    // 2. GET TAG
-    const params = new URLSearchParams(window.location.search);
-    let tag = params.get('tag');
-
-    if (!tag || tag.trim() === "" || tag === "null") {
-        window.location.replace('home.html');
-    }
-
-    if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-    document.getElementById('tag').value = tag;
-
-    // 3. SECURITY CHECK WITH DIAGNOSTIC FEEDBACK
-    const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
-    
-    fetch(verifyUrl)
-        .then(res => res.text())
-        .then(status => {
-            const response = status.trim();
-            console.log("SERVER RETURNED:", response); 
+        // Security Guardrail
+        if (!tag || tag.trim() === "" || tag === "null") {
+            window.location.replace('home.html');
+        }
+        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
+        document.getElementById('tag').value = tag;
+        
+        // 2. SECURITY VERIFICATION GATE
+        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        fetch(verifyUrl)
+            .then(res => res.text())
+            .then(status => {
+                if (status.trim() === "register.html") {
+                    // Show the form only if verified
+                    document.getElementById('loadingView').style.display = 'none';
+                    document.getElementById('formView').style.display = 'block';
+                } else {
+                    // Redirect if invalid
+                    window.location.replace('home.html');
+                }
+            })
+            .catch(() => window.location.replace('home.html'));
+        
+        // 3. FORM SUBMISSION
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const data = Object.fromEntries(new FormData(e.target));
             
-            if (response === "register.html") {
-                document.getElementById('loadingView').style.display = 'none';
-                document.getElementById('formView').style.display = 'block';
-            } else {
-                // STOP REDIRECTING! Show the error on screen so we can fix it.
-                document.getElementById('loadingView').innerHTML = `
-                    <h2 style="color:var(--accent)">Verification Error</h2>
-                    <p>The server returned: <strong>${response}</strong></p>
-                    <p>Check your Google Apps Script logic.</p>
-                `;
+            let cleanPhone = data.phone.replace(/\D/g, ''); 
+            if (cleanPhone.length !== 10) {
+                alert("Please enter exactly 10 digits.");
+                return;
             }
-        })
-        .catch((err) => {
-            document.getElementById('loadingView').innerHTML = `<h2>Error</h2><p>${err}</p>`;
-        });
+            data.phone = '91' + cleanPhone;
+            data.tag = tag;
 
-    // 4. FORM SUBMISSION
-    document.getElementById('regForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        const data = Object.fromEntries(new FormData(e.target));
-        data.phone = '91' + data.phone.replace(/\D/g, '');
-        data.tag = tag;
-
-        btn.innerHTML = "Activating...";
-        btn.disabled = true;
-        
-        await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
-            method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
-        });
-        
-        document.getElementById('mainCard').innerHTML = `
-            <div style="text-align: center; padding: 20px 0;">
-                <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
-                <h2 style="color: #FF6961; margin-bottom: 10px;">Activation Successful!</h2>
-                <p style="color: white;">Your tag is successfully linked.</p>
-            </div>
-        `;
-        setTimeout(() => { window.location.replace('home.html'); }, 3000);
-    };
-</script>
+            btn.innerHTML = "Activating...";
+            btn.disabled = true;
+            
+            await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
+                method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
+            });
+            
+            const card = document.getElementById('mainCard');
+            card.innerHTML = `
+                <div style="text-align: center; padding: 20px 0;">
+                    <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+                    <h2 style="color: #FF6961; margin-bottom: 10px;">Ready for the Real World</h2>
+                    <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
+                </div>
+            `;
+            setTimeout(() => { window.location.replace('home.html'); }, 3000);
+        };
+    </script>
 </body>
 </html>
