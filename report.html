@@ -51,6 +51,7 @@
             display: block; width: 100%; background: #1a1a1a; color: white; 
             padding: 16px; border-radius: 12px; border: 1px solid #333;
             font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 12px;
+            text-decoration: none; /* REMOVES THE UNDERLINE */
         }
         .btn:hover { background: #222; transform: translateY(-2px); border-color: #444; }
         .btn-accent { background: white; color: black; border: none; font-weight: 700; margin-top: 10px; }
@@ -65,8 +66,8 @@
             <h2>Contact Owner</h2>
             <textarea id="customMsg" rows="3" placeholder="Add a note (Optional, e.g., 'Found near Gate 2')"></textarea>
             
-            <button class="btn" onclick="sendAlert('Blocking Way', this)">Vehicle is blocking my way</button>
-            <button class="btn" onclick="sendAlert('Found Item', this)">I found your lost item</button>
+            <button class="btn" onclick="sendAlert('Vehicle is blocking the way', this)">Vehicle is blocking my way</button>
+            <button class="btn" onclick="sendAlert('Found your lost item', this)">I found your lost item</button>
         </div>
     </div>
 
@@ -111,6 +112,7 @@
             // Universal Success State
             document.getElementById('actionArea').innerHTML = `
                 <div style="animation: fadeInUp 0.5s ease-out;">
+                    <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #10b981; margin-bottom: 15px;">Owner Notified!</h2>
                     <p style="margin-bottom: 25px; color: var(--text-muted);">The owner has received your message instantly. Thank you for your help!</p>
                     <a href="home.html" class="btn btn-accent">Get your own Tether Tag</a>
