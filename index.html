@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticating | Tether</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface: #111111;
+            --accent: #FF6961;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+        }
+         body { 
+            margin: 0;
+            background-color: var(--bg-color); 
+            background-image: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 100%);
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; /* Changed from center to flex-start */
+            padding-top: 80px;       /* Control the exact distance from the top here */
+            min-height: 100vh; 
+            margin: 0;
+        }
+        .container { text-align: center; max-width: 350px; width: 100%; }
+        .logo { width: 100px; height: 100px; border-radius: 20px; margin-bottom: 2rem; border: 1px solid #333; }
+        
+        .box { padding: 40px; background: var(--surface); border-radius: 24px; border: 1px solid #222; }
+        .spinner { 
+            width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); 
+            border-top-color: var(--accent); border-radius: 50%; 
+            animation: spin 0.8s linear infinite; margin: 0 auto 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        h2 { font-size: 1.5rem; margin-bottom: 10px; }
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
+        
+        .btn-home { 
+            display: inline-block; background: var(--accent); color: white; padding: 12px 30px; 
+            border-radius: 50px; text-decoration: none; font-weight: 600; margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="authBox">
+        <div class="box">
+            <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+            <div class="spinner"></div>
+            <h2>Authenticating...</h2>
+            <p>Verifying your tag security.</p>
+        </div>
+    </div>
+
+    <script>
+        
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
+        
+        if (tag && tag.startsWith("IND-IND-")) { tag = tag.replace("IND-IND-", "IND-"); }
+        window.history.replaceState({}, document.title, window.location.protocol + "//" + window.location.host + window.location.pathname);
+
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        fetch(scriptUrl)
+            .then(response => response.text())
+            .then(page => {
+                const result = page.trim();
+                if (result === "invalid") {
+                    document.getElementById('authBox').innerHTML = `
+                        <div class="box">
+                            <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+                            <h2>Tag not recognized</h2>
+                            <p>This tag is not activated. Please contact Tether support.</p>
+                            <a href="home.html" class="btn-home">Back to Home</a>
+                        </div>
+                    `;
+                } else {
+                    window.location.replace(result + "?tag=" + tag);
+                }
+            })
+            .catch(() => {
+                document.getElementById('authBox').innerHTML = "<h2 style='color: var(--accent);'>Connection Error</h2>";
+            });
+    </script>
+</body>
+</html>
