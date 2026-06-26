@@ -75,65 +75,86 @@
         button:hover { background: #e0e0e0; transform: translateY(-2px); }
         
         .helper-text { display: block; color: var(--text-muted); font-size: 0.75rem; margin-top: 8px; }
+
+        /* Spinner for loading state */
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="card" id="mainCard">
-        <div class="header">
+        <div id="loadingView" style="text-align: center; padding: 20px 0;">
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
-            <h2>Activate your Tag</h2>
-            <p>One scan, endless protection.</p>
+            <div class="spinner"></div>
+            <h2 style="margin-bottom: 10px;">Authenticating...</h2>
+            <p>Verifying the Tether Tag.</p>
         </div>
-        
-        <form id="regForm">
-            <div class="input-group">
-                <input type="text" id="tag" name="tag" readonly>
+
+        <div id="formView" style="display: none;">
+            <div class="header">
+                <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+                <h2>Activate your Tag</h2>
+                <p>One scan, endless protection.</p>
             </div>
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Full Name" required>
-            </div>
-            <div class="input-group">
-                <input type="text" name="item" placeholder="Item (e.g., Honda Civic, Backpack)" required>
-            </div>
-            <div class="input-group">
-                <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" minlength="10" pattern="[0-9]{10}">
-                <span class="helper-text">10-digit number only (no country code)</span>
-            </div>
-            <button type="submit" id="submitBtn">Activate Tag</button>
-        </form>
+            
+            <form id="regForm">
+                <div class="input-group">
+                    <input type="text" id="tag" name="tag" readonly>
+                </div>
+                <div class="input-group">
+                    <input type="text" name="name" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <input type="text" name="item" placeholder="Item (e.g., Honda Civic, Backpack)" required>
+                </div>
+                <div class="input-group">
+                    <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" minlength="10" pattern="[0-9]{10}">
+                    <span class="helper-text">10-digit number only (no country code)</span>
+                </div>
+                <button type="submit" id="submitBtn">Activate Tag</button>
+            </form>
+        </div>
     </div>
 
     <script>
-        // 1. Consolidated Logic
+        // 1. URL MASKING
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
 
-        // Security Guardrail: Redirect if tag is invalid/empty
         if (!tag || tag.trim() === "" || tag === "null") {
             window.location.replace('home.html');
         }
 
-        // Sanitization
         if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-        
-        // Mask URL
-        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-
         document.getElementById('tag').value = tag;
+
+        // 2. SECURITY GATE: Verify with Google Sheet
+        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
         
-        // 2. Form Submission
+        fetch(verifyUrl)
+            .then(res => res.text())
+            .then(status => {
+                // If the Sheet returns 'register.html', we show the form.
+                if (status.trim() === "register.html") {
+                    document.getElementById('loadingView').style.display = 'none';
+                    document.getElementById('formView').style.display = 'block';
+                } else {
+                    // Redirect to home if tag is not valid
+                    window.location.replace('home.html');
+                }
+            })
+            .catch(() => window.location.replace('home.html'));
+
+        // 3. FORM SUBMISSION
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const data = Object.fromEntries(new FormData(e.target));
             
             let cleanPhone = data.phone.replace(/\D/g, ''); 
-            if (cleanPhone.length !== 10) {
-                alert("Please enter exactly 10 digits.");
-                return;
-            }
             data.phone = '91' + cleanPhone;
             data.tag = tag;
 
@@ -141,15 +162,12 @@
             btn.disabled = true;
             
             await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
-                method: "POST", 
-                mode: "no-cors", 
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(data) 
+                method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
             });
             
-            const card = document.getElementById('mainCard');
-            card.innerHTML = `
+            document.getElementById('mainCard').innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
+                    <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #FF6961; margin-bottom: 10px;">Ready for the Real World</h2>
                     <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
                 </div>
