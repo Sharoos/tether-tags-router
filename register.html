@@ -17,12 +17,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
         body { 
+            margin: 0;
             background-color: var(--bg-color); 
             background-image: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 100%);
             color: var(--text-main); 
-            min-height: 100vh;
-            display: flex; justify-content: center; align-items: center; 
-            padding: 20px;
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            padding-top: 80px;
+            min-height: 100vh; 
         }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -102,15 +105,25 @@
     </div>
 
     <script>
+        // 1. Consolidated Logic
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
+
+        // Security Guardrail: Redirect if tag is invalid/empty
+        if (!tag || tag.trim() === "" || tag === "null") {
+            window.location.replace('home.html');
+        }
+
+        // Sanitization
         if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
         
+        // Mask URL
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
         document.getElementById('tag').value = tag;
         
+        // 2. Form Submission
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
