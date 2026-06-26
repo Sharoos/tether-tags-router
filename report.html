@@ -51,17 +51,28 @@
             display: block; width: 100%; background: #1a1a1a; color: white; 
             padding: 16px; border-radius: 12px; border: 1px solid #333;
             font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 12px;
-            text-decoration: none; /* REMOVES THE UNDERLINE */
+            text-decoration: none;
         }
         .btn:hover { background: #222; transform: translateY(-2px); border-color: #444; }
         .btn-accent { background: white; color: black; border: none; font-weight: 700; margin-top: 10px; }
         .btn-accent:hover { background: #e0e0e0; transform: translateY(0); }
+
+        /* Spinner for loading state */
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="container" id="mainContainer">
-        <div id="actionArea">
+        <div id="loadingView" style="text-align: center; padding: 20px 0;">
+            <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
+            <div class="spinner"></div>
+            <h2>Authenticating...</h2>
+            <p>Verifying tag security.</p>
+        </div>
+
+        <div id="actionArea" style="display: none;">
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
             <h2>Contact Owner</h2>
             <textarea id="customMsg" rows="3" placeholder="Add a note (Optional, e.g., 'Found near Gate 2')"></textarea>
@@ -72,24 +83,41 @@
     </div>
 
     <script>
-        // 1. Tag handling & Security Guardrail
+        // 1. Tag handling
         const params = new URLSearchParams(window.location.search);
         let tag = params.get('tag');
 
-        // Update localStorage if tag exists, otherwise try to retrieve from storage
         if (tag) {
             localStorage.setItem('currentTag', tag);
         } else {
             tag = localStorage.getItem('currentTag');
         }
 
-        // SECURITY: Kick users out if no tag is found in URL or Storage
-        if (!tag || tag.trim() === "" || tag === "null") {
-            window.location.replace('home.html');
-        }
-
-        // 2. MASK THE URL
+        // Mask URL
         window.history.replaceState({}, document.title, window.location.protocol + "//" + window.location.host + window.location.pathname);
+
+        // 2. SECURITY VERIFICATION GATE
+        const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+        
+        fetch(verifyUrl)
+            .then(res => res.text())
+            .then(status => {
+                const response = status.trim();
+                // Check if the server says it's okay to load this page
+                if (response === "report.html") {
+                    document.getElementById('loadingView').style.display = 'none';
+                    document.getElementById('actionArea').style.display = 'block';
+                } else {
+                    document.getElementById('loadingView').innerHTML = `
+                        <h2>Verification Issue</h2>
+                        <p>Server returned: ${response}</p>
+                        <a href="home.html" class="btn btn-accent">Back to Home</a>
+                    `;
+                }
+            })
+            .catch(() => {
+                document.getElementById('loadingView').innerHTML = `<h2>Error connecting</h2>`;
+            });
 
         // 3. The alert function
         async function sendAlert(issue, btn) {
@@ -109,8 +137,7 @@
                 body: JSON.stringify(payload) 
             });
 
-            // Universal Success State
-            document.getElementById('actionArea').innerHTML = `
+            document.getElementById('mainContainer').innerHTML = `
                 <div style="animation: fadeInUp 0.5s ease-out;">
                     <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                     <h2 style="color: #10b981; margin-bottom: 15px;">Owner Notified!</h2>
