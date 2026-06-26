@@ -117,59 +117,70 @@
         </div>
     </div>
 
-    <script>
-        // 1. Consolidated Logic
-        const params = new URLSearchParams(window.location.search);
-        let tag = params.get('tag');
+<script>
+    // 1. MASK URL IMMEDIATELY
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
 
-        // Security Guardrail: Redirect if tag is invalid/empty
-        if (!tag || tag.trim() === "" || tag === "null") {
-            window.location.replace('home.html');
-        }
+    // 2. GET TAG
+    const params = new URLSearchParams(window.location.search);
+    let tag = params.get('tag');
 
-        // Sanitization
-        if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-        
-        // Mask URL
-        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
+    // DEBUGGING: If you see "Tag is null" in your browser console, that is why it redirects
+    console.log("Current Tag:", tag);
 
-        document.getElementById('tag').value = tag;
-        
-        // 2. Form Submission
-        document.getElementById('regForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const data = Object.fromEntries(new FormData(e.target));
-            
-            let cleanPhone = data.phone.replace(/\D/g, ''); 
-            if (cleanPhone.length !== 10) {
-                alert("Please enter exactly 10 digits.");
-                return;
+    if (!tag || tag.trim() === "" || tag === "null") {
+        console.log("Tag is empty, redirecting to home.html");
+        window.location.replace('home.html');
+    }
+
+    if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
+    document.getElementById('tag').value = tag;
+
+    // 3. RESTORED VERIFICATION GATE
+    // This fetch ensures the page knows if it should stay open or redirect
+    const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
+    
+    fetch(verifyUrl)
+        .then(res => res.text())
+        .then(status => {
+            console.log("Server status:", status); // Check console to see what your sheet says
+            if (status.trim() === "register.html") {
+                // Tag is unregistered, allow form to show
+                document.getElementById('formView').style.display = 'block';
+                document.getElementById('loadingView').style.display = 'none';
+            } else {
+                // Tag is registered or invalid, go home
+                window.location.replace('home.html');
             }
-            data.phone = '91' + cleanPhone;
-            data.tag = tag;
+        })
+        .catch(() => {
+            console.log("Fetch failed, redirecting");
+            window.location.replace('home.html');
+        });
 
-            btn.innerHTML = "Activating...";
-            btn.disabled = true;
-            
-            await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
-                method: "POST", 
-                mode: "no-cors", 
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(data) 
-            });
+    // 4. FORM SUBMISSION
+    document.getElementById('regForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const data = Object.fromEntries(new FormData(e.target));
+        data.phone = '91' + data.phone.replace(/\D/g, '');
+        data.tag = tag;
+
+        btn.innerHTML = "Activating...";
+        btn.disabled = true;
         
-        // Show Success
-        const mainCard = document.getElementById('mainCard');
-        mainCard.innerHTML = `
+        await fetch("https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec", { 
+            method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
+        });
+        
+        document.getElementById('mainCard').innerHTML = `
             <div style="text-align: center; padding: 20px 0;">
                 <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo" alt="Tether">
                 <h2 style="color: #FF6961; margin-bottom: 10px;">Activation Successful!</h2>
-                <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
+                <p style="color: white;">Your tag is successfully linked.</p>
             </div>
         `;
-        
         setTimeout(() => { window.location.replace('home.html'); }, 3000);
     };
 </script>
