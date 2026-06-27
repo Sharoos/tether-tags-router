@@ -23,30 +23,22 @@
             color: var(--text-main); 
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* Matches index.html */
-            padding-top: 80px;       /* Matches index.html */
+            /* Matches index.html exactly */
+            align-items: flex-start; 
+            padding-top: 80px;
             min-height: 100vh; 
         }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* =========================================
-           1. EXACT INDEX.HTML LOADER STYLES
-           ========================================= */
+        /* --- STYLES FOR THE AUTHENTICATING BOX (Matches index.html) --- */
         .container { text-align: center; max-width: 400px; width: 100%; animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .box { padding: 40px; background: var(--surface); border-radius: 24px; border: 1px solid #222; }
         .logo-auth { width: 100px; height: 100px; border-radius: 20px; margin-bottom: 2rem; border: 1px solid #333; }
-        
-        .spinner { 
-            width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); 
-            border-top-color: var(--accent); border-radius: 50%; 
-            animation: spin 0.8s linear infinite; margin: 0 auto 20px auto;
-        }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* =========================================
-           2. REGISTRATION FORM STYLES
-           ========================================= */
+        /* --- STYLES FOR THE REGISTRATION FORM --- */
         .card {
             background: var(--surface);
             padding: 2.5rem;
@@ -59,8 +51,8 @@
 
         .header { text-align: center; margin-bottom: 2rem; }
         .logo-form { width: 90px; height: 90px; border-radius: 20px; margin-bottom: 1.5rem; border: 1px solid #333; }
-        h2 { font-size: 1.5rem; margin-bottom: 10px; }
-        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
+        h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        p { color: var(--text-muted); font-size: 0.95rem; }
 
         .input-group { margin-bottom: 1.2rem; }
         input {
@@ -90,27 +82,25 @@
             transition: 0.3s;
         }
         button:hover { background: #e0e0e0; transform: translateY(-2px); }
-        
         .helper-text { display: block; color: var(--text-muted); font-size: 0.75rem; margin-top: 8px; }
-        .btn-diagnostic { background: var(--accent); color: white; border: none; font-weight: 700; margin-top: 20px; padding: 12px 24px; border-radius: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="authBox">
+    <div class="container" id="loadingView">
         <div class="box">
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo-auth" alt="Tether">
             <div class="spinner"></div>
-            <h2>Authenticating...</h2>
-            <p>Verifying the Tether Tag.</p>
+            <h2 style="margin-bottom: 10px;">Authenticating...</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">Verifying the Tether Tag.</p>
         </div>
     </div>
 
     <div class="card" id="formView" style="display: none;">
         <div class="header">
             <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo-form" alt="Tether">
-            <h2 style="margin-bottom: 0.5rem;">Activate your Tag</h2>
-            <p style="margin-bottom: 0;">Smart tags for everything you <span style="color: #FF6961;">love</span></p>
+            <h2>Activate your Tag</h2>
+            <p>Smart tags for everything you <span style="color: #FF6961;">love</span></p>
         </div>
         
         <form id="regForm">
@@ -132,54 +122,47 @@
     </div>
 
     <script>
-        // --- 1. MASK URL IMMEDIATELY ---
+        // 1. URL MASKING
+        const params = new URLSearchParams(window.location.search);
+        let tag = params.get('tag');
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
-        // --- 2. GET TAG ---
-        const params = new URLSearchParams(window.location.search);
-        let tag = params.get('tag');
-
+        // Security Guardrail
+        if (!tag || tag.trim() === "" || tag === "null") {
+            window.location.replace('home.html');
+        }
         if (tag && tag.startsWith("TT-TT-")) { tag = tag.replace("TT-TT-", "TT-"); }
-        if (tag) { document.getElementById('tag').value = tag; }
-
-        // --- 3. DIAGNOSTIC SECURITY GATE ---
+        document.getElementById('tag').value = tag;
+        
+        // 2. SECURITY VERIFICATION GATE
         const verifyUrl = "https://script.google.com/macros/s/AKfycbz3oQqBzevolDjsRwTJexsog18KMq7cbavGMlRtJsDS9B4wV_-ks86o40xX2DFPVPhh/exec?tag=" + tag;
         
         fetch(verifyUrl)
             .then(res => res.text())
             .then(status => {
-                const response = status.trim();
-                
-                if (response === "register.html") {
-                    // Success! Hide the loader box, show the form card smoothly
-                    document.getElementById('authBox').style.display = 'none';
+                if (status.trim() === "register.html") {
+                    // Hide loader, show form
+                    document.getElementById('loadingView').style.display = 'none';
                     document.getElementById('formView').style.display = 'block';
                 } else {
-                    // STOP REDIRECTING! Show what the server actually returned.
-                    document.getElementById('authBox').innerHTML = `
-                        <div class="box">
-                            <h2 style="color:var(--accent);">Verification Stalled</h2>
-                            <p style="margin-bottom:10px;">The server responded with:</p>
-                            <code style="display:block; padding:10px; background:#000; border-radius:8px; color:var(--text-muted); margin-bottom:15px;">"${response}"</code>
-                            <p style="font-size:0.85rem">It was expecting "register.html"</p>
-                            <button class="btn-diagnostic" onclick="document.getElementById('authBox').style.display='none'; document.getElementById('formView').style.display='block';">Force Load Form</button>
-                        </div>
-                    `;
+                    // Redirect if invalid
+                    window.location.replace('home.html');
                 }
             })
-            .catch((err) => {
-                document.getElementById('authBox').innerHTML = `<div class="box"><h2 style="color:var(--accent);">Network Error</h2><p>${err}</p></div>`;
-            });
-
-        // --- 4. FORM SUBMISSION ---
+            .catch(() => window.location.replace('home.html'));
+        
+        // 3. FORM SUBMISSION
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const data = Object.fromEntries(new FormData(e.target));
             
             let cleanPhone = data.phone.replace(/\D/g, ''); 
-            if (cleanPhone.length !== 10) { alert("Please enter exactly 10 digits."); return; }
+            if (cleanPhone.length !== 10) {
+                alert("Please enter exactly 10 digits.");
+                return;
+            }
             data.phone = '91' + cleanPhone;
             data.tag = tag;
 
@@ -190,14 +173,15 @@
                 method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) 
             });
             
-            // Show Success Box matching the form card size
-            document.getElementById('formView').innerHTML = `
+            const card = document.getElementById('formView');
+            card.innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
                     <img src="https://i.ibb.co/5XnsDTjD/TT.png" class="logo-form" alt="Tether">
                     <h2 style="color: #FF6961; margin-bottom: 10px;">Ready for the Real World</h2>
                     <p style="color: white;">Your tag is successfully linked. We've got your back from here.</p>
                 </div>
             `;
+            setTimeout(() => { window.location.replace('home.html'); }, 3000);
         };
     </script>
 </body>
