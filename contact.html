@@ -9,7 +9,18 @@
         .container { max-width: 400px; width: 100%; }
         .box { padding: 40px; background: var(--surface); border-radius: 24px; border: 1px solid #222; }
         h1 { color: var(--accent); margin-bottom: 20px; font-size: 1.5rem; text-align: center; }
-        input, textarea { width: 100%; background: #161616; border: 1px solid #333; color: white; padding: 16px; border-radius: 12px; margin-bottom: 15px; }
+        /* Update your input and textarea styles to this */
+input, textarea {
+    width: 100%;              /* Narrower than 100% to create breathing room */
+    display: block;          /* Ensures they act as block elements */
+    margin: 0 auto 15px auto; /* 0 top/bottom margin, 'auto' handles horizontal centering */
+    background: #161616;
+    border: 1px solid #333;
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-sizing: border-box;  /* Ensures padding doesn't affect width */
+}
         button { width: 100%; background: white; color: black; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; }
         button:hover { background: #e0e0e0; }
         .back-link { display: block; text-align: center; margin-top: 20px; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
@@ -31,7 +42,7 @@
             <h1>Contact Support</h1>
             <form id="contactForm">
                 <input type="text" name="name" placeholder="Full Name" required>
-                <input type="tel" name="phone" placeholder="WhatsApp Number" required>
+                <input type="tel" name="phone" placeholder="WhatsApp Number" required maxlength="10" minlength="10" pattern="[0-9]{10}">                
                 <textarea name="message" rows="4" placeholder="How can we help?" required></textarea>
                 <button type="submit" id="submitBtn">Send Message</button>
             </form>
