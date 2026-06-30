@@ -1,18 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Privacy Policy - Tether</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tether Tags Privacy Policy - Learn how we protect your data and keep your phone number secure while providing privacy-first asset recovery.">
+    <title>Privacy Policy | Tether Tags</title>
+    
     <style>
-        body { background-color: #050505; color: #ffffff; padding: 40px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-        h1 { color: #FF6961; margin-bottom: 20px; }
-        h2 { margin-top: 30px; }
+        :root {
+            --bg-color: #050505;
+            --surface: #111111;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent: #FF6961;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            background-image: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 100%);
+            color: var(--text-main); 
+            line-height: 1.6; 
+            padding: 0 20px;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Content Styling */
+        .content-section { 
+            max-width: 800px; 
+            margin: 4rem auto; 
+            text-align: left; 
+            animation: fadeInUp 0.8s ease-out; 
+            min-height: 60vh;
+        }
+        
+        .content-section h1 { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            margin-bottom: 0.5rem; 
+            letter-spacing: -0.5px; 
+        }
+        
+        .content-section h1 span { color: var(--accent); }
+        
+        .content-section h2 { 
+            font-size: 1.4rem; 
+            margin-top: 2.5rem; 
+            margin-bottom: 1rem; 
+            color: var(--text-main); 
+            border-bottom: 1px solid #222; 
+            padding-bottom: 0.5rem; 
+        }
+        
+        .content-section p { 
+            color: var(--text-muted); 
+            margin-bottom: 1.5rem; 
+            font-size: 1.05rem; 
+        }
+        
+        .content-section ul { 
+            color: var(--text-muted); 
+            margin-bottom: 1.5rem; 
+            padding-left: 20px; 
+            font-size: 1.05rem; 
+        }
+        
+        .content-section li { margin-bottom: 0.5rem; }
+        .content-section strong { color: var(--text-main); }
+        
+        .content-section a { 
+            color: var(--accent); 
+            text-decoration: none; 
+            transition: 0.3s; 
+            font-weight: 500;
+        }
+        
+        .content-section a:hover { color: white; }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 10px 20px;
+            background: var(--surface);
+            border: 1px solid #222;
+            border-radius: 50px;
+            font-size: 0.95rem;
+        }
+        
+        .back-link:hover {
+            background: #161616;
+            border-color: #444;
+            color: var(--text-main);
+        }
+
+        /* Footer matches Home */
+        footer { margin-top: 6rem; padding: 40px 0; border-top: 1px solid #222; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        footer a { color: var(--text-muted); margin: 0 10px; text-decoration: none; transition: 0.3s; }
+        footer a:hover { color: var(--text-main); }
     </style>
 </head>
 <body>
-    <h1>Privacy Policy</h1>
-    <p>At Tether, your privacy is our priority. We collect minimal information required to provide our asset recovery service, primarily your phone number to facilitate WhatsApp notifications when a tag is scanned.</p>
-    <h2>Data Usage</h2>
-    <p>Your contact details are used solely for the purpose of notifying you of your tag activity. We do not sell, rent, or share your personal data with third-party marketers.</p>
-    <p><a href="home.html" style="color: #FF6961;">&larr; Back to Home</a></p>
+
+    <section class="content-section">
+        <h1>Privacy <span>Policy</span></h1>
+        <p style="font-size: 0.9rem; margin-bottom: 2rem;"><em>Last updated: June 30, 2026</em></p>
+
+        <p>At Tether Tags, protecting your privacy is at the core of our service. We are committed to ensuring that your personal information remains secure while providing you with a reliable asset recovery experience.</p>
+
+        <h2>Information We Collect</h2>
+        <p>We collect only the essential information needed to keep you connected:</p>
+        <ul>
+            <li><strong>Contact Information:</strong> Your phone number, used exclusively to route WhatsApp notifications when your tag is scanned.</li>
+            <li><strong>System Data:</strong> Minimal information related to tag activity to ensure our services operate reliably.</li>
+        </ul>
+
+        <h2>Data Usage & Privacy</h2>
+        <p>Your contact details are used solely for the purpose of notifying you of your tag activity. We act as a secure bridge—the person scanning your tag never sees your actual phone number. We do not sell, rent, or share your personal data with third-party marketers.</p>
+
+        <h2>Your Security</h2>
+        <p>We are committed to maintaining the security of your data. We do not require you to create an account or download any applications, ensuring zero friction and maximum privacy.</p>
+
+        <h2>Your Rights</h2>
+        <p>You maintain control over your data. You may contact us at any time to request the deletion of your account or the modification of your contact information.</p>
+
+        <h2>Contact Us</h2>
+        <p>If you have any questions or concerns regarding our privacy practices, please contact us at: <strong>tethertags@gmail.com</strong></p>
+
+        <a href="home.html" class="back-link">&larr; Back to Home</a>
+    </section>
+
 </body>
 </html>
